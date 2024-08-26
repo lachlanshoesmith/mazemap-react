@@ -1,7 +1,7 @@
 {
   "name": "mazemap-react",
   "version": "1.0.0",
-  "description": "React components for the MazeMap API.",
+  "description": "React components for MazeMap.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
