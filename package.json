@@ -1,0 +1,12 @@
+{
+  "name": "mazemap-react",
+  "version": "1.0.0",
+  "description": "React components for the MazeMap API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
