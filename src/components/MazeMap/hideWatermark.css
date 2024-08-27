@@ -1,0 +1,7 @@
+.mazemap-ctrl-logo-wrapper .mazemap-ctrl-logo,
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib.mapboxgl-compact .mapboxgl-ctrl-attrib-button,
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-inner,
+.mapboxgl-ctrl.mapboxgl-ctrl-attrib.mm-attribution-control-override {
+  display: none;
+}

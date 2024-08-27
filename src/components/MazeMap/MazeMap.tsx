@@ -19,6 +19,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   width: string;
   height: string;
   controls?: boolean;
+  hideWatermark?: boolean;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -49,11 +50,6 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-
     const script = document.createElement('script');
     script.src = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.js';
     document.body.appendChild(script);
@@ -65,11 +61,30 @@ const MazeMap = (props: MazeMapProps) => {
     };
   }, []);
   return (
-    <div
-      ref={mapRef}
-      id="map"
-      style={{ width: props.width, height: props.height }}
-    ></div>
+    <>
+      <link
+        rel="stylesheet"
+        href="https://api.mazemap.com/js/v2.1.2/mazemap.min.css"
+      />
+      <div
+        ref={mapRef}
+        id="map"
+        style={{ width: props.width, height: props.height }}
+      ></div>
+      {props.hideWatermark && (
+        <style>
+          {`
+          div.mazemap-ctrl-logo-wrapper .mazemap-ctrl-logo,
+          a.mapboxgl-ctrl-logo,
+          .mapboxgl-ctrl-attrib.mapboxgl-compact .mapboxgl-ctrl-attrib-button,
+          .mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-inner,
+          .mapboxgl-ctrl.mapboxgl-ctrl-attrib.mm-attribution-control-override {
+            display: none;
+          }
+          `}
+        </style>
+      )}
+    </>
   );
 };
 
