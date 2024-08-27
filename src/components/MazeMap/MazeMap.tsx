@@ -2,18 +2,13 @@ import React, { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
-    MazeMap: any;
+    Mazemap: any;
   }
 }
 
 export interface MazeMapProps {
   label: string;
 }
-
-const addNewMap = (MazeMap: any) => {
-  console.log(MazeMap);
-  const map = new MazeMap.map({ container: 'mazemap-container' });
-};
 
 const MazeMap = (props: MazeMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -28,10 +23,8 @@ const MazeMap = (props: MazeMapProps) => {
     document.body.appendChild(link);
 
     script.onload = () => {
-      if (window.MazeMap) {
-        addNewMap(window.MazeMap);
-      } else {
-        console.error('mazemap-react: MazeMap is not defined on the window');
+      if (window.Mazemap && mapRef.current?.innerHTML === '') {
+        const map = new window.Mazemap.Map({ container: 'map' });
       }
     };
   }, []);
