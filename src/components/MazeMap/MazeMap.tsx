@@ -29,6 +29,8 @@ const MazeMap = (props: MazeMapProps) => {
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
+    center: props.center,
+    zoom: props.zoom,
   };
 
   const mapOptions: MazeMapOptions = {
@@ -48,6 +50,7 @@ const MazeMap = (props: MazeMapProps) => {
     script.onload = () => {
       if (window.Mazemap && mapRef.current?.innerHTML === '') {
         const map = new window.Mazemap.Map(mapOptions);
+        map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
       }
     };
   }, []);
