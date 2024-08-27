@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "React components for MazeMap.",
   "author": "Lachlan Shoesmith",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/lachlanshoesmith"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c"
