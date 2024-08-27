@@ -16,8 +16,8 @@ export interface MazeMapUserOptions {
 }
 
 export interface MazeMapProps extends MazeMapUserOptions {
-  width: number;
-  height: number;
+  width: string;
+  height: string;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
