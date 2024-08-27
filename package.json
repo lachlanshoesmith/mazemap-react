@@ -2,12 +2,12 @@
   "name": "mazemap-react",
   "version": "1.0.0",
   "description": "React components for MazeMap.",
-  "main": "index.js",
+  "author": "Lachlan Shoesmith",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
   },
   "keywords": [],
-  "author": "",
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
@@ -17,9 +17,17 @@
     "react": "^18.3.1",
     "rollup": "^4.21.1",
     "rollup-plugin-dts": "^6.1.1",
+    "tslib": "^2.7.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "mazemap-react": "link:"
-  }
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "dist/index.d.ts"
 }
