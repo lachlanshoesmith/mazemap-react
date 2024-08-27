@@ -49,13 +49,16 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.css';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
     const script = document.createElement('script');
     script.src = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.js';
     document.body.appendChild(script);
 
-    const link = document.createElement('link');
-    link.href = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.css';
-    document.body.appendChild(link);
+    mapRef.current?.classList.add('mazemap');
 
     script.onload = () => {
       prepareMap();
