@@ -18,6 +18,7 @@ export interface MazeMapUserOptions {
 export interface MazeMapProps extends MazeMapUserOptions {
   width: string;
   height: string;
+  controls?: boolean;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -38,6 +39,15 @@ const MazeMap = (props: MazeMapProps) => {
     ...userOptions,
   };
 
+  const prepareMap = () => {
+    if (window.Mazemap && mapRef.current?.innerHTML === '') {
+      const map = new window.Mazemap.Map(mapOptions);
+      if (props.controls) {
+        map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
+      }
+    }
+  };
+
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.js';
@@ -48,10 +58,7 @@ const MazeMap = (props: MazeMapProps) => {
     document.body.appendChild(link);
 
     script.onload = () => {
-      if (window.Mazemap && mapRef.current?.innerHTML === '') {
-        const map = new window.Mazemap.Map(mapOptions);
-        map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
-      }
+      prepareMap();
     };
   }, []);
   return (
