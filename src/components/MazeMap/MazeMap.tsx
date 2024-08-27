@@ -29,8 +29,8 @@ const MazeMap = (props: MazeMapProps) => {
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
-    center: props.center,
-    zoom: props.zoom,
+    ...(props.center && { center: props.center }),
+    ...(props.zoom && { zoom: props.zoom }),
   };
 
   const mapOptions: MazeMapOptions = {
