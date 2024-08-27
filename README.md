@@ -9,7 +9,6 @@
   campuses={123}
   center={{ lng: 123, lat: -123 }}
   zoom={3}
-  // numbers are in px
   width={'500px'}
   height={'30vh'}
   // more props can be seen in
