@@ -6,12 +6,35 @@ declare global {
   }
 }
 
-export interface MazeMapProps {
-  label: string;
+export interface MazeMapUserOptions {
+  campuses: number;
+  center?: {
+    lat: number;
+    lng: number;
+  };
+  zoom?: number;
+}
+
+export interface MazeMapProps extends MazeMapUserOptions {
+  width: number;
+  height: number;
+}
+
+export interface MazeMapOptions extends MazeMapUserOptions {
+  container: string;
 }
 
 const MazeMap = (props: MazeMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
+
+  const userOptions: MazeMapUserOptions = {
+    campuses: props.campuses,
+  };
+
+  const mapOptions: MazeMapOptions = {
+    container: 'map',
+    ...userOptions,
+  };
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -24,12 +47,16 @@ const MazeMap = (props: MazeMapProps) => {
 
     script.onload = () => {
       if (window.Mazemap && mapRef.current?.innerHTML === '') {
-        const map = new window.Mazemap.Map({ container: 'map' });
+        const map = new window.Mazemap.Map(mapOptions);
       }
     };
   }, []);
   return (
-    <div ref={mapRef} id="map" style={{ width: '100%', height: '100%' }}></div>
+    <div
+      ref={mapRef}
+      id="map"
+      style={{ width: props.width, height: props.height }}
+    ></div>
   );
 };
 
