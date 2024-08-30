@@ -6,13 +6,20 @@ declare global {
   }
 }
 
+interface Coordinates {
+  lng: number;
+  lat: number;
+}
+
 export interface MazeMapUserOptions {
   campuses: number;
-  center?: {
-    lat: number;
-    lng: number;
-  };
+  center?: Coordinates;
   zoom?: number;
+}
+
+enum MarkerProp {
+  Marker = 1,
+  POIMarker = 2,
 }
 
 export interface MazeMapProps extends MazeMapUserOptions {
@@ -20,14 +27,31 @@ export interface MazeMapProps extends MazeMapUserOptions {
   height: string;
   controls?: boolean;
   hideWatermark?: boolean;
+  marker?: MarkerProp;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
   container: string;
 }
 
+interface XY {
+  x: number;
+  y: number;
+}
+
+interface MapClick {
+  _defaultPrevented: boolean;
+  point: XY;
+  lngLat: Coordinates;
+  originalEvent: MouseEvent;
+  target: any; // very complicated definition
+  type: string;
+}
+
 const MazeMap = (props: MazeMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  let highlighter: any;
+  let marker: any;
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
@@ -40,12 +64,76 @@ const MazeMap = (props: MazeMapProps) => {
     ...userOptions,
   };
 
+  const clearMarker = (map: any) => {
+    if (marker) {
+      marker.remove();
+    }
+    highlighter.clear();
+  };
+
+  const drawMarker = (map: any, coordinates: Coordinates, zLevel: number) => {
+    if (window.Mazemap) {
+      marker = new window.Mazemap.MazeMarker({
+        color: '#ff00cc',
+        innerCircle: true,
+        innerCircleColor: '#ffffff',
+        size: 34,
+        innerCircleScale: 0.5,
+        zlevel: zLevel,
+      })
+        .setLngLat(coordinates)
+        .addTo(map);
+    }
+  };
+
+  const initialiseHighlighter = (map: any) => {
+    if (window.Mazemap) {
+      highlighter = new window.Mazemap.Highlighter(map, {
+        showOutline: true,
+        showFill: true,
+        outlineColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
+        fillColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
+      });
+    }
+  };
+
+  const addMarker = (map: any, e: MapClick, markerType: MarkerProp) => {
+    let coordinates = e.lngLat;
+    let zLevel = map.zLevel;
+
+    clearMarker(map);
+
+    if (window.Mazemap) {
+      window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
+        coordinates = window.Mazemap.Util.getPoiLngLat(poi);
+        zLevel = poi.properties.zLevel;
+        if (poi.geometry.type === 'Polygon') {
+          highlighter.highlight(poi);
+          map.flyTo({
+            center: coordinates,
+            zoom: 19,
+            speed: 0.5,
+          });
+        }
+      });
+      drawMarker(map, coordinates, zLevel);
+    }
+  };
+
   const prepareMap = () => {
     if (window.Mazemap && mapRef.current?.innerHTML === '') {
       const map = new window.Mazemap.Map(mapOptions);
-      if (props.controls) {
-        map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
-      }
+      map.on('load', () => {
+        if (props.controls) {
+          map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
+        }
+        if (props.marker) {
+          initialiseHighlighter(map);
+          map.on('click', (e: MapClick) => {
+            addMarker(map, e, props.marker as MarkerProp);
+          });
+        }
+      });
     }
   };
 
@@ -74,14 +162,14 @@ const MazeMap = (props: MazeMapProps) => {
       {props.hideWatermark && (
         <style>
           {`
-          div.mazemap-ctrl-logo-wrapper .mazemap-ctrl-logo,
-          a.mapboxgl-ctrl-logo,
-          .mapboxgl-ctrl-attrib.mapboxgl-compact .mapboxgl-ctrl-attrib-button,
-          .mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-inner,
-          .mapboxgl-ctrl.mapboxgl-ctrl-attrib.mm-attribution-control-override {
-            display: none;
-          }
-          `}
+        div.mazemap-ctrl-logo-wrapper .mazemap-ctrl-logo,
+        a.mapboxgl-ctrl-logo,
+        .mapboxgl-ctrl-attrib.mapboxgl-compact .mapboxgl-ctrl-attrib-button,
+        .mapboxgl-ctrl-attrib.mapboxgl-compact-show .mapboxgl-ctrl-attrib-inner,
+        .mapboxgl-ctrl.mapboxgl-ctrl-attrib.mm-attribution-control-override {
+          display: none;
+        }
+        `}
         </style>
       )}
     </>

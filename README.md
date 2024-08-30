@@ -1,6 +1,6 @@
 # mazemap-react
 
-[mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component
+[mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
 ## example usage
 
