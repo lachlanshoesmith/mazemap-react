@@ -2,6 +2,8 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
+![1.0.4](https://img.shields.io/npm/v/:@lachlanshoesmith/mazemap-react)
+
 ## example usage
 
 ```tsx
