@@ -20,6 +20,10 @@
 />
 ```
 
+## installation
+
+`npm install @lachlanshoesmith/mazemap-react`
+
 ## building
 
 `npm run build` generates both an esm and cjs export in `dist/`.
