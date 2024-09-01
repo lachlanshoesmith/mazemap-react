@@ -28,7 +28,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   controls?: boolean;
   hideWatermark?: boolean;
   marker?: MarkerProp;
-  onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
+  onMapClick: (coordinates: Coordinates, zLevel: number) => void | undefined;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -137,6 +137,10 @@ const MazeMap = (props: MazeMapProps) => {
           initialiseHighlighter(map);
           map.on('click', (e: MapClick) => {
             addMarker(map, e, props.marker as MarkerProp);
+          });
+        } else if (props.onMapClick) {
+          map.on('click', (e: MapClick) => {
+            props.onMapClick(e.lngLat, map.zLevel);
           });
         }
       });
