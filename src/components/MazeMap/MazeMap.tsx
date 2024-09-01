@@ -17,7 +17,7 @@ export interface MazeMapUserOptions {
   zoom?: number;
 }
 
-enum MarkerProp {
+export enum MarkerProp {
   Marker = 1,
   POIMarker = 2,
 }

@@ -11,6 +11,9 @@
   zoom={3}
   width={'500px'}
   height={'30vh'}
+  hideWatermark={false}
+  marker={1}
+  onMapClick={(coordinates, zLevel) => ...}
   // more props can be seen in
   // the MazeMapUserOptions interface
 />
