@@ -28,6 +28,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   controls?: boolean;
   hideWatermark?: boolean;
   marker?: MarkerProp;
+  onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -116,6 +117,11 @@ const MazeMap = (props: MazeMapProps) => {
           });
         }
       });
+
+      if (props.onMapClick) {
+        props.onMapClick(coordinates, zLevel);
+      }
+
       drawMarker(map, coordinates, zLevel);
     }
   };
