@@ -68,6 +68,7 @@ const MazeMap = (props: MazeMapProps) => {
     campuses: props.campuses,
     ...(props.center && { center: props.center }),
     ...(props.zoom && { zoom: props.zoom }),
+    ...(props.maxBounds && { maxBounds: props.maxBounds }),
   };
 
   const mapOptions: MazeMapOptions = {
@@ -151,6 +152,7 @@ const MazeMap = (props: MazeMapProps) => {
         if (props.controls) {
           map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
         }
+
         if (props.marker) {
           initialiseHighlighter(map);
           map.on('click', (e: MapClick) => {
