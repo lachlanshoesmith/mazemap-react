@@ -2,7 +2,7 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
-![1.0.14](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
+![1.0.16](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
 
 ## example usage
 

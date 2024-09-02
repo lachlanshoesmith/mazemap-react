@@ -33,13 +33,20 @@ export interface MarkerProp {
   size?: number;
 }
 
+interface LineProp {
+  colour?: string;
+  coordinates: CoordinatesPair;
+}
+
 export interface MazeMapProps extends MazeMapUserOptions {
+  [key: string]: any;
   width: string;
   height: string;
   controls?: boolean;
   hideWatermark?: boolean;
   marker?: MarkerProp;
   onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
+  line?: LineProp;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -102,16 +109,16 @@ const MazeMap = (props: MazeMapProps) => {
     highlighter.clear();
   };
 
-  const getFromMarker = (key: string, defaultValue: any) => {
-    if (!props.marker) return defaultValue;
-    return props.marker[key] || defaultValue;
+  const getProp = (prop: string, key: string, defaultValue: any) => {
+    if (!props[prop]) return defaultValue;
+    return props[prop][key] || defaultValue;
   };
 
   const drawMarker = (map: any, coordinates: Coordinates, zLevel: number) => {
     if (window.Mazemap) {
-      const colour = getFromMarker('colour', '#ff00cc');
-      const innerColour = getFromMarker('innerColour', '#ffffff');
-      const size = getFromMarker('size', 34);
+      const colour = getProp('marker', 'colour', '#ff00cc');
+      const innerColour = getProp('marker', 'innerColour', '#ffffff');
+      const size = getProp('marker', 'size', 34);
 
       marker = new window.Mazemap.MazeMarker({
         color: colour,
@@ -164,6 +171,40 @@ const MazeMap = (props: MazeMapProps) => {
     }
   };
 
+  const addLine = (
+    map: any,
+    colour: string,
+    coordinates: [CoordinatesObject, CoordinatesObject]
+  ) => {
+    if (window.Mazemap) {
+      map.addLayer({
+        id: 'line1',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: [
+                [coordinates[0].lng, coordinates[0].lat],
+                [coordinates[1].lng, coordinates[1].lat],
+              ],
+            },
+          },
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': colour,
+          'line-width': 3,
+        },
+      });
+    }
+  };
+
   const prepareMap = () => {
     if (window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
@@ -178,6 +219,17 @@ const MazeMap = (props: MazeMapProps) => {
             addMarker(map, e, props.marker as MarkerProp);
           });
         }
+
+        if (props.line) {
+          const colour = getProp('line', 'colour', '#ff00cc');
+          const coordinates = props.line.coordinates.map(getCoordinates);
+          addLine(
+            map,
+            colour,
+            coordinates as [CoordinatesObject, CoordinatesObject]
+          );
+        }
+
         map.on('click', (e: MapClick) => {
           if (!props.onMapClick) return;
           props.onMapClick(e.lngLat, map.zLevel);
