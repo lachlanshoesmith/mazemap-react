@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 declare global {
   interface Window {
@@ -50,7 +50,6 @@ interface MapClick {
 }
 
 const MazeMap = (props: MazeMapProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
   let highlighter: any;
   let marker: any;
 
@@ -127,7 +126,7 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   const prepareMap = () => {
-    if (window.Mazemap && mapRef.current?.innerHTML === '') {
+    if (window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
       map.on('load', () => {
         if (props.controls) {
@@ -152,10 +151,17 @@ const MazeMap = (props: MazeMapProps) => {
     script.src = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.js';
     document.body.appendChild(script);
 
-    mapRef.current?.classList.add('mazemap');
+    const map = document.getElementById('map');
+    if (map) {
+      map.classList.add('mazemap');
+    }
 
     script.onload = () => {
       prepareMap();
+    };
+    script.onerror = (e) => {
+      console.error('mazemap-react: mazemap script failed to load');
+      console.error(e);
     };
   }, []);
   return (
@@ -164,11 +170,7 @@ const MazeMap = (props: MazeMapProps) => {
         rel="stylesheet"
         href="https://api.mazemap.com/js/v2.1.2/mazemap.min.css"
       />
-      <div
-        ref={mapRef}
-        id="map"
-        style={{ width: props.width, height: props.height }}
-      ></div>
+      <div id="map" style={{ width: props.width, height: props.height }}></div>
       {props.hideWatermark && (
         <style>
           {`

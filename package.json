@@ -20,9 +20,6 @@
     "tslib": "^2.7.0",
     "typescript": "^5.5.4"
   },
-  "dependencies": {
-    "mazemap-react": "link:"
-  },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "files": [
