@@ -15,11 +15,20 @@ export interface MazeMapUserOptions {
   campuses: number;
   center?: Coordinates;
   zoom?: number;
+  maxBounds?: Bounds;
 }
 
-enum MarkerProp {
+export enum MarkerType {
   Marker = 1,
   POIMarker = 2,
+}
+
+export interface MarkerProp {
+  [key: string]: any;
+  type: MarkerType;
+  colour?: string;
+  innerColour?: string;
+  size?: number;
 }
 
 export interface MazeMapProps extends MazeMapUserOptions {
@@ -49,6 +58,8 @@ interface MapClick {
   type: string;
 }
 
+type Bounds = [[number, number], [number, number]];
+
 const MazeMap = (props: MazeMapProps) => {
   let highlighter: any;
   let marker: any;
@@ -71,13 +82,22 @@ const MazeMap = (props: MazeMapProps) => {
     highlighter.clear();
   };
 
+  const getFromMarker = (key: string, defaultValue: any) => {
+    if (!props.marker) return defaultValue;
+    return props.marker[key] || defaultValue;
+  };
+
   const drawMarker = (map: any, coordinates: Coordinates, zLevel: number) => {
     if (window.Mazemap) {
+      const colour = getFromMarker('colour', '#ff00cc');
+      const innerColour = getFromMarker('innerColour', '#ffffff');
+      const size = getFromMarker('size', 34);
+
       marker = new window.Mazemap.MazeMarker({
-        color: '#ff00cc',
+        color: colour,
         innerCircle: true,
-        innerCircleColor: '#ffffff',
-        size: 34,
+        innerCircleColor: innerColour,
+        size,
         innerCircleScale: 0.5,
         zlevel: zLevel,
       })
@@ -97,7 +117,7 @@ const MazeMap = (props: MazeMapProps) => {
     }
   };
 
-  const addMarker = (map: any, e: MapClick, markerType: MarkerProp) => {
+  const addMarker = (map: any, e: MapClick, marker: MarkerProp) => {
     let coordinates = e.lngLat;
     let zLevel = map.zLevel;
 
@@ -109,7 +129,7 @@ const MazeMap = (props: MazeMapProps) => {
         zLevel = poi.properties.zLevel;
         if (
           poi.geometry.type === 'Polygon' &&
-          markerType === MarkerProp.POIMarker
+          marker.type === MarkerType.POIMarker
         ) {
           highlighter.highlight(poi);
           map.flyTo({
@@ -119,10 +139,6 @@ const MazeMap = (props: MazeMapProps) => {
           });
         }
       });
-
-      if (props.onMapClick) {
-        props.onMapClick(coordinates, zLevel);
-      }
 
       drawMarker(map, coordinates, zLevel);
     }
@@ -191,4 +207,4 @@ const MazeMap = (props: MazeMapProps) => {
   );
 };
 
-export { MazeMap, MarkerProp as Marker };
+export { MazeMap, MarkerType as Marker };
