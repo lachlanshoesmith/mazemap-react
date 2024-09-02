@@ -49,6 +49,9 @@
 
 `npm run build` generates both an esm and cjs export in `dist/`.
 
+## contributing
+Make sure to `echo "auto-install-peers=false" >> ~/.npmrc` then `npm i`. You can test changes by importing the component locally. Ensure you `npm run build` for changes to be reflected in your development environment.
+
 ## credits
 
 not affiliated with the mazemap project whatsoever. but shoutout to them.
