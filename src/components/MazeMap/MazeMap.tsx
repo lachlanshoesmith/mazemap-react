@@ -107,7 +107,10 @@ const MazeMap = (props: MazeMapProps) => {
       window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
         coordinates = window.Mazemap.Util.getPoiLngLat(poi);
         zLevel = poi.properties.zLevel;
-        if (poi.geometry.type === 'Polygon') {
+        if (
+          poi.geometry.type === 'Polygon' &&
+          markerType === MarkerProp.POIMarker
+        ) {
           highlighter.highlight(poi);
           map.flyTo({
             center: coordinates,
