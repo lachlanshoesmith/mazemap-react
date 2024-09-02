@@ -191,4 +191,4 @@ const MazeMap = (props: MazeMapProps) => {
   );
 };
 
-export { MazeMap, MarkerProp };
+export { MazeMap, MarkerProp as Marker };

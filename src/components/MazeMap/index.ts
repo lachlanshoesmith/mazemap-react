@@ -1,1 +1,1 @@
-export { default } from './MazeMap';
+export { MazeMap, Marker } from './MazeMap';

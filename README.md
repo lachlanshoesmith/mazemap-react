@@ -14,7 +14,7 @@
   width={'500px'}
   height={'30vh'}
   hideWatermark={false}
-  marker={MarkerProp.POIMarker}	// marker that locks on to and highlights POI if one is clicked on
+  marker={Marker.POIMarker}	// marker that locks on to and highlights POI if one is clicked on
   onMapClick={(coordinates, zLevel) => ...}
   // more props can be seen in
   // the MazeMapUserOptions interface
