@@ -35,6 +35,7 @@ export interface MarkerProp {
 
 interface LineProp {
   colour?: string;
+  width?: number;
   coordinates: CoordinatesPair;
 }
 
@@ -174,6 +175,7 @@ const MazeMap = (props: MazeMapProps) => {
   const addLine = (
     map: any,
     colour: string,
+    width: number,
     coordinates: [CoordinatesObject, CoordinatesObject]
   ) => {
     if (window.Mazemap) {
@@ -199,7 +201,7 @@ const MazeMap = (props: MazeMapProps) => {
         },
         paint: {
           'line-color': colour,
-          'line-width': 3,
+          'line-width': width,
         },
       });
     }
@@ -222,10 +224,12 @@ const MazeMap = (props: MazeMapProps) => {
 
         if (props.line) {
           const colour = getProp('line', 'colour', '#ff00cc');
+          const width = getProp('line', 'width', 3);
           const coordinates = props.line.coordinates.map(getCoordinates);
           addLine(
             map,
             colour,
+            width,
             coordinates as [CoordinatesObject, CoordinatesObject]
           );
         }
