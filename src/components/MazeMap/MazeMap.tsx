@@ -6,16 +6,18 @@ declare global {
   }
 }
 
-interface Coordinates {
+interface CoordinatesObject {
   lng: number;
   lat: number;
 }
 
+type Coordinates = [number, number];
+
 export interface MazeMapUserOptions {
   campuses: number;
-  center?: Coordinates;
+  center?: CoordinatesObject | Coordinates;
   zoom?: number;
-  maxBounds?: Bounds;
+  maxBounds?: CoordinatesPair;
 }
 
 export enum MarkerType {
@@ -58,7 +60,22 @@ interface MapClick {
   type: string;
 }
 
-type Bounds = [[number, number], [number, number]];
+type CoordinatesPair = [
+  Coordinates | CoordinatesObject,
+  Coordinates | CoordinatesObject
+];
+
+const getCoordinates = (
+  coordinates: Coordinates | CoordinatesObject
+): CoordinatesObject => {
+  if (Array.isArray(coordinates)) {
+    return {
+      lng: coordinates[0],
+      lat: coordinates[1],
+    };
+  }
+  return coordinates;
+};
 
 const MazeMap = (props: MazeMapProps) => {
   let highlighter: any;
@@ -66,9 +83,11 @@ const MazeMap = (props: MazeMapProps) => {
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
-    ...(props.center && { center: props.center }),
+    ...(props.center && { center: getCoordinates(props.center) }),
     ...(props.zoom && { zoom: props.zoom }),
-    ...(props.maxBounds && { maxBounds: props.maxBounds }),
+    ...(props.maxBounds && {
+      maxBounds: props.maxBounds.map(getCoordinates) as CoordinatesPair,
+    }),
   };
 
   const mapOptions: MazeMapOptions = {

@@ -2,7 +2,7 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
-![1.0.4](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
+![1.0.14](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
 
 ## example usage
 
@@ -10,6 +10,7 @@
 <MazeMap
   campuses={123}
   center={{ lng: 123, lat: -123 }}
+  center={[123, -123]} // this also works - take your pick!
   zoom={3}
   width={'500px'}
   height={'30vh'}
@@ -25,9 +26,17 @@
   }}
   onMapClick={(coordinates, zLevel) => ...}
   maxBounds={
+    // again, you can use either syntax:
     [[151.217893555, -33.9242064802],
-    [151.244924424,-33.9126716815]]
+    { lng: 151.244924424, lat: -33.9126716815 }]
   }
+  line={{
+    colour: '#ff0000',
+    coordinates: [
+      [151.217893555, -33.9242064802],
+      [151.244924424, -33.9126716815]
+    ]
+  }}
 />
 ```
 
