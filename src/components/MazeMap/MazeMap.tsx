@@ -30,6 +30,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   marker?: MarkerProp;
   hideIcons?: boolean;
   hideAll?: boolean;
+  setTitle?: string;
   onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
 }
 
@@ -130,70 +131,56 @@ const MazeMap = (props: MazeMapProps) => {
     }
   };
 
+  const deleteIcons = (style: any) => {
+    // layer 143 Room / Point-Of-Interest icons
+    // layer 144 Building Icons
+    const poiIcons = style.layers[143];
+    const buildingIcons = style.layers[144];
+
+    // deletes all associated icon fields from style layer layout.
+    delete poiIcons.layout["icon-image"];
+    delete poiIcons.layout["icon-offset"];
+    delete poiIcons.layout["text-offset"];
+    delete poiIcons.layout["text-anchor"];
+
+    delete buildingIcons.layout["icon-image"];
+    delete buildingIcons.layout["icon-offset"];
+    delete buildingIcons.layout["text-offset"];
+    delete buildingIcons.layout["text-anchor"];
+
+    return style;
+  };
+
+  const deleteAll = (style: any) => {
+    style.layers = style.layers.filter((layer: any) => {
+      if (layer.type) {
+        return layer.type !== "symbol";
+      }
+    });
+
+    return style;
+  };
+
   const prepareMap = () => {
     if (window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
       map.on("load", () => {
+        let style = map.getStyle();
         if (props.controls) {
           map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
         }
-        if (props.hideIcons && (!props.hideAll)) {
-          let style = map.getStyle();
-
-          // layer 143 room icons
-          let layer143 = style.layers[143];
-          // layer144 building icons
-          let layer144 = style.layers[144];
-
-          layer143.layout = {
-            "text-field": "{text}",
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-            "text-padding": 7,
-            "text-size": {
-              base: 1,
-              stops: [
-                [17, 10],
-                [20, 16],
-                [20.9, 22],
-              ],
-            },
-            "text-anchor": "center",
-          };
-
-          layer144.layout = {
-            "text-field": "{text}",
-            "text-allow-overlap": false,
-            "symbol-avoid-edges": false,
-            "text-size": {
-              base: 1,
-              stops: [
-                [13, 10],
-                [16, 12],
-                [17, 14],
-                [20, 20],
-              ],
-            },
-            "text-font": {
-              base: 1,
-              stops: [
-                [10, ["Open Sans Regular"]],
-                [17, ["Open Sans Bold"]],
-              ],
-            },
-            "text-letter-spacing": 0.05,
-            "text-padding": 10.75,
-          };
-          map.setStyle(style);
+        if (props.hideIcons && !props.hideAll) {
+          style = deleteIcons(map.getStyle());
         }
         if (props.hideAll) {
-          let style = map.getStyle();
-          style.layers = style.layers.filter((layer: any) => {
-            if (layer.type) {
-              return layer.type !== "symbol";
-            }
-          });
-          map.setStyle(style);
+          style = deleteAll(map.getStyle());
         }
+        if (props.setTitle) {
+          style = map.getStyle();
+          let buildingsLayer = style.layers[146];
+          buildingsLayer.layout["text-field"] = props.setTitle;
+        }
+        map.setStyle(style);
         if (props.marker) {
           initialiseHighlighter(map);
           map.on("click", (e: MapClick) => {
