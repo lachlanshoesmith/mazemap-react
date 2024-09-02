@@ -177,7 +177,7 @@ const MazeMap = (props: MazeMapProps) => {
         }
         if (props.setTitle) {
           style = map.getStyle();
-          let buildingsLayer = style.layers[146];
+          const buildingsLayer = style.layers[146];
           buildingsLayer.layout["text-field"] = props.setTitle;
         }
         map.setStyle(style);
