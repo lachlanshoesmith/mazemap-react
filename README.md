@@ -2,7 +2,7 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
-![1.0.18](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
+![1.0.19](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
 
 ## example usage
 
@@ -24,6 +24,7 @@
     innerColour: '#0000ff',
     size: 32
   }}
+  // coordinates passed to onMapClick will be in the tuple [] format
   onMapClick={(coordinates, zLevel) => ...}
   maxBounds={
     // again, you can use either syntax:
@@ -42,7 +43,15 @@
     fill: true,
     outline: true,
     colour: '#ff0000',
-    outlineColour: '#00ffff'
+    outlineColour: '#00ffff',
+    poiOnLoad: {
+      // highlight a POI at the given coordinates
+      // when the map is mounted
+      // as usual, you can enter the coordinates in either
+      // the {lng: lat: } format or as a tuple
+      coordinates: [151.244924424, -33.9126716815],
+      zLevel: 0
+    }
   }}
 />
 ```
