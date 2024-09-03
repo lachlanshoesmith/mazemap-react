@@ -2,7 +2,7 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
-![1.0.17](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
+![1.0.18](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
 
 ## example usage
 
@@ -37,6 +37,12 @@
       [151.244924424, -33.9126716815]
     ],
     width: 3
+  }},
+  highlight={{
+    fill: true,
+    outline: true,
+    colour: '#ff0000',
+    outlineColour: '#00ffff'
   }}
 />
 ```

@@ -39,6 +39,13 @@ interface LineProp {
   coordinates: CoordinatesPair;
 }
 
+interface HighlighterProp {
+  fill: boolean;
+  outline: boolean;
+  colour?: string;
+  outlineColour?: string;
+}
+
 export interface MazeMapProps extends MazeMapUserOptions {
   [key: string]: any;
   width: string;
@@ -48,6 +55,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   marker?: MarkerProp;
   onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
   line?: LineProp;
+  highlighter?: HighlighterProp;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -103,11 +111,16 @@ const MazeMap = (props: MazeMapProps) => {
     ...userOptions,
   };
 
-  const clearMarker = (map: any) => {
+  const clearMarker = () => {
     if (marker) {
       marker.remove();
     }
-    highlighter.clear();
+  };
+
+  const clearHighlighter = () => {
+    if (highlighter) {
+      highlighter.clear();
+    }
   };
 
   const getProp = (prop: string, key: string, defaultValue: any) => {
@@ -135,21 +148,41 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   const initialiseHighlighter = (map: any) => {
+    if (!props.highlighter) return;
+    const outline = props.highlighter.outline;
+    const fill = props.highlighter.fill;
+    const outlineColour = getProp(
+      'highlighter',
+      'outlineColour',
+      window.Mazemap.Util.Colors.MazeColors.MazeBlue
+    );
+    const colour = getProp(
+      'highlighter',
+      'colour',
+      window.Mazemap.Util.Colors.MazeColors.MazeBlue
+    );
+
     if (window.Mazemap) {
       highlighter = new window.Mazemap.Highlighter(map, {
-        showOutline: true,
-        showFill: true,
-        outlineColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
-        fillColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
+        showOutline: outline,
+        showFill: fill,
+        outlineColor: outlineColour,
+        fillColor: colour,
       });
     }
+  };
+
+  const highlightPoi = (poi: any) => {
+    if (!highlighter) return;
+    highlighter.highlight(poi);
   };
 
   const addMarker = (map: any, e: MapClick, marker: MarkerProp) => {
     let coordinates = e.lngLat;
     let zLevel = map.zLevel;
 
-    clearMarker(map);
+    clearMarker();
+    clearHighlighter();
 
     if (window.Mazemap) {
       window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
@@ -159,7 +192,7 @@ const MazeMap = (props: MazeMapProps) => {
           poi.geometry.type === 'Polygon' &&
           marker.type === MarkerType.POIMarker
         ) {
-          highlighter.highlight(poi);
+          highlightPoi(poi);
           map.flyTo({
             center: coordinates,
             zoom: 19,
@@ -215,8 +248,11 @@ const MazeMap = (props: MazeMapProps) => {
           map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
         }
 
-        if (props.marker) {
+        if (props.highlighter) {
           initialiseHighlighter(map);
+        }
+
+        if (props.marker) {
           map.on('click', (e: MapClick) => {
             addMarker(map, e, props.marker as MarkerProp);
           });
