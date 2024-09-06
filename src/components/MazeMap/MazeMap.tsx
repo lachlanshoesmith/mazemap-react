@@ -6,23 +6,61 @@ declare global {
   }
 }
 
-interface Coordinates {
+interface CoordinatesObject {
   lng: number;
   lat: number;
 }
 
+type Coordinates = [number, number];
+
 export interface MazeMapUserOptions {
   campuses: number;
-  center?: Coordinates;
+  center?: CoordinatesObject | Coordinates;
   zoom?: number;
+  maxBounds?: CoordinatesPair;
 }
 
-enum MarkerProp {
+export enum MarkerType {
   Marker = 1,
   POIMarker = 2,
 }
 
+export interface MarkerProp {
+  [key: string]: any;
+  type: MarkerType;
+  colour?: string;
+  innerColour?: string;
+  size?: number;
+}
+
+interface LineProp {
+  colour?: string;
+  width?: number;
+  coordinates: CoordinatesPair;
+}
+
+interface PoiLocation {
+  coordinates: Coordinates | CoordinatesObject;
+  zLevel: number;
+}
+
+interface Poi {
+  // A subset of the POI type returned by MazeMap
+  coordinates: CoordinatesObject;
+  geometry: string;
+  zLevel: number;
+}
+
+interface HighlighterProp {
+  fill: boolean;
+  outline: boolean;
+  colour?: string;
+  outlineColour?: string;
+  poiOnLoad?: PoiLocation;
+}
+
 export interface MazeMapProps extends MazeMapUserOptions {
+  [key: string]: any;
   width: string;
   height: string;
   controls?: boolean;
@@ -32,6 +70,8 @@ export interface MazeMapProps extends MazeMapUserOptions {
   hideAll?: boolean;
   setTitle?: string;
   onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
+  line?: LineProp;
+  highlighter?: HighlighterProp;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -46,11 +86,28 @@ interface XY {
 interface MapClick {
   _defaultPrevented: boolean;
   point: XY;
-  lngLat: Coordinates;
+  lngLat: CoordinatesObject;
   originalEvent: MouseEvent;
   target: any; // very complicated definition
   type: string;
 }
+
+type CoordinatesPair = [
+  Coordinates | CoordinatesObject,
+  Coordinates | CoordinatesObject
+];
+
+const getCoordinates = (
+  coordinates: Coordinates | CoordinatesObject
+): CoordinatesObject => {
+  if (Array.isArray(coordinates)) {
+    return {
+      lng: coordinates[0],
+      lat: coordinates[1],
+    };
+  }
+  return coordinates;
+};
 
 const MazeMap = (props: MazeMapProps) => {
   let highlighter: any;
@@ -58,8 +115,11 @@ const MazeMap = (props: MazeMapProps) => {
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
-    ...(props.center && { center: props.center }),
+    ...(props.center && { center: getCoordinates(props.center) }),
     ...(props.zoom && { zoom: props.zoom }),
+    ...(props.maxBounds && {
+      maxBounds: props.maxBounds.map(getCoordinates) as CoordinatesPair,
+    }),
   };
 
   const mapOptions: MazeMapOptions = {
@@ -67,20 +127,38 @@ const MazeMap = (props: MazeMapProps) => {
     ...userOptions,
   };
 
-  const clearMarker = (map: any) => {
+  const clearMarker = () => {
     if (marker) {
       marker.remove();
     }
-    highlighter.clear();
   };
 
-  const drawMarker = (map: any, coordinates: Coordinates, zLevel: number) => {
+  const clearHighlighter = () => {
+    if (highlighter) {
+      highlighter.clear();
+    }
+  };
+
+  const getProp = (prop: string, key: string, defaultValue: any) => {
+    if (!props[prop]) return defaultValue;
+    return props[prop][key] || defaultValue;
+  };
+
+  const drawMarker = (
+    map: any,
+    coordinates: CoordinatesObject,
+    zLevel: number
+  ) => {
     if (window.Mazemap) {
+      const colour = getProp("marker", "colour", "#ff00cc");
+      const innerColour = getProp("marker", "innerColour", "#ffffff");
+      const size = getProp("marker", "size", 34);
+
       marker = new window.Mazemap.MazeMarker({
-        color: "#ff00cc",
+        color: colour,
         innerCircle: true,
-        innerCircleColor: "#ffffff",
-        size: 34,
+        innerCircleColor: innerColour,
+        size,
         innerCircleScale: 0.5,
         zlevel: zLevel,
       })
@@ -90,44 +168,78 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   const initialiseHighlighter = (map: any) => {
+    if (!props.highlighter) return;
+    const outline = props.highlighter.outline;
+    const fill = props.highlighter.fill;
+    const outlineColour = getProp(
+      "highlighter",
+      "outlineColour",
+      window.Mazemap.Util.Colors.MazeColors.MazeBlue
+    );
+    const colour = getProp(
+      "highlighter",
+      "colour",
+      window.Mazemap.Util.Colors.MazeColors.MazeBlue
+    );
+
     if (window.Mazemap) {
       highlighter = new window.Mazemap.Highlighter(map, {
-        showOutline: true,
-        showFill: true,
-        outlineColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
-        fillColor: window.Mazemap.Util.Colors.MazeColors.MazeBlue,
+        showOutline: outline,
+        showFill: fill,
+        outlineColor: outlineColour,
+        fillColor: colour,
       });
     }
   };
 
-  const addMarker = (map: any, e: MapClick, markerType: MarkerProp) => {
+  const highlightPoi = (poi: any) => {
+    if (!highlighter) return;
+    // TODO: figure out the type of POI here
+    // or at least, what data is needed
+    // so i can put it in the POI type
+    highlighter.highlight(poi);
+  };
+
+  const getPoiAt = (
+    coordinates: CoordinatesObject,
+    zLevel: number
+  ): Poi | null => {
+    if (window.Mazemap) {
+      window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
+        const poiCoordinates: CoordinatesObject =
+          window.Mazemap.Util.getPoiLngLat(poi);
+        const poiZLevel = poi.properties.zLevel;
+        const geometry = poi.geometry.type;
+        return {
+          coordinates: poiCoordinates,
+          zLevel: poiZLevel,
+          geometry,
+        };
+      });
+    }
+    return null;
+  };
+
+  const addMarker = (map: any, e: MapClick, marker: MarkerProp) => {
     let coordinates = e.lngLat;
     let zLevel = map.zLevel;
 
-    clearMarker(map);
+    clearMarker();
+    clearHighlighter();
 
     if (window.Mazemap) {
-      window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
-        coordinates = window.Mazemap.Util.getPoiLngLat(poi);
-        zLevel = poi.properties.zLevel;
-        if (
-          poi.geometry.type === "Polygon" &&
-          markerType === MarkerProp.POIMarker
-        ) {
-          highlighter.highlight(poi);
-          map.flyTo({
-            center: coordinates,
-            zoom: 19,
-            speed: 0.5,
-          });
-        }
-      });
-
-      if (props.onMapClick) {
-        props.onMapClick(coordinates, zLevel);
+      const poi = getPoiAt(coordinates, zLevel);
+      if (!poi) return null;
+      if (poi.geometry === "Polygon" && marker.type === MarkerType.POIMarker) {
+        highlightPoi(poi);
+        map.flyTo({
+          center: poi.coordinates,
+          zoom: 19,
+          speed: 0.5,
+        });
       }
 
-      drawMarker(map, coordinates, zLevel);
+      drawMarker(map, getCoordinates(poi.coordinates), poi.zLevel);
     }
   };
 
@@ -161,6 +273,47 @@ const MazeMap = (props: MazeMapProps) => {
 
     return style;
   };
+  const addLine = (
+    map: any,
+    colour: string,
+    width: number,
+    coordinates: [CoordinatesObject, CoordinatesObject]
+  ) => {
+    if (window.Mazemap) {
+      map.addLayer({
+        id: "line1",
+        type: "line",
+        source: {
+          type: "geojson",
+          data: {
+            type: "Feature",
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [coordinates[0].lng, coordinates[0].lat],
+                [coordinates[1].lng, coordinates[1].lat],
+              ],
+            },
+          },
+        },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": colour,
+          "line-width": width,
+        },
+      });
+    }
+  };
+
+  const showPoiOnLoad = (poiOnLoad: PoiLocation) => {
+    const poiCoordinates: CoordinatesObject = getCoordinates(
+      poiOnLoad.coordinates
+    );
+    const poi = getPoiAt(poiCoordinates, poiOnLoad.zLevel);
+  };
 
   const prepareMap = () => {
     if (window.Mazemap) {
@@ -181,15 +334,35 @@ const MazeMap = (props: MazeMapProps) => {
           buildingsLayer.layout["text-field"] = props.setTitle;
         }
         map.setStyle(style);
-        if (props.marker) {
+
+        if (props.highlighter) {
           initialiseHighlighter(map);
+          if (props.highlighter.poiOnLoad) {
+            showPoiOnLoad(props.highlighter.poiOnLoad);
+          }
+        }
+
+        if (props.marker) {
           map.on("click", (e: MapClick) => {
             addMarker(map, e, props.marker as MarkerProp);
           });
         }
+
+        if (props.line) {
+          const colour = getProp("line", "colour", "#ff00cc");
+          const width = getProp("line", "width", 3);
+          const coordinates = props.line.coordinates.map(getCoordinates);
+          addLine(
+            map,
+            colour,
+            width,
+            coordinates as [CoordinatesObject, CoordinatesObject]
+          );
+        }
+
         map.on("click", (e: MapClick) => {
           if (!props.onMapClick) return;
-          props.onMapClick(e.lngLat, map.zLevel);
+          props.onMapClick([e.lngLat.lng, e.lngLat.lat], map.zLevel);
         });
       });
     }
@@ -237,4 +410,4 @@ const MazeMap = (props: MazeMapProps) => {
   );
 };
 
-export { MazeMap, MarkerProp as Marker };
+export { MazeMap, MarkerType as Marker };
