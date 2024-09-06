@@ -151,7 +151,8 @@ const MazeMap = (props: MazeMapProps) => {
     return style;
   };
 
-  const deleteAll = (style: any) => {
+  // Hides all icons and names from the map.
+  const hideAll = (style: any) => {
     style.layers = style.layers.filter((layer: any) => {
       if (layer.type) {
         return layer.type !== "symbol";
@@ -173,7 +174,7 @@ const MazeMap = (props: MazeMapProps) => {
           style = deleteIcons(map.getStyle());
         }
         if (props.hideAll) {
-          style = deleteAll(map.getStyle());
+          style = hideAll(map.getStyle());
         }
         if (props.setTitle) {
           style = map.getStyle();
