@@ -264,7 +264,7 @@ const MazeMap = (props: MazeMapProps) => {
   };
 
   // Hides all icons and names from the map.
-  const hideAll = (style: any) => {
+  const hideIconsNames = (style: any) => {
     style.layers = style.layers.filter((layer: any) => {
       if (layer.type) {
         return layer.type !== "symbol";
@@ -323,11 +323,11 @@ const MazeMap = (props: MazeMapProps) => {
         if (props.controls) {
           map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
         }
-        if (props.hideIcons && !props.hideAll) {
+        if (props.hideIcons && !props.hideIconsNames) {
           style = deleteIcons(map.getStyle());
         }
-        if (props.hideAll) {
-          style = hideAll(map.getStyle());
+        if (props.hideIconsNames) {
+          style = hideIconsNames(map.getStyle());
         }
         if (props.setTitle) {
           const buildingsLayer = style.layers[146];
