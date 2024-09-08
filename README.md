@@ -17,9 +17,9 @@
   hideWatermark={false}
   marker={{
     // marker that locks on to and highlights POI if one is clicked on
-    // MarkerType.Marker does not do this and just draws a marker exactly
+    // Marker.Marker does not do this and just draws a marker exactly
     // where the user clicked
-    type: MarkerType.POIMarker,
+    type: Marker.POIMarker,
     colour: '#ff0000',
     innerColour: '#0000ff',
     size: 32
