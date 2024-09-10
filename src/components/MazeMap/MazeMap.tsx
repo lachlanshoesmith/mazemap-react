@@ -203,6 +203,7 @@ const MazeMap = (props: MazeMapProps) => {
   ): Poi | null => {
     if (window.Mazemap) {
       window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
+        if (!poi) return null;
         const poiCoordinates: CoordinatesObject =
           window.Mazemap.Util.getPoiLngLat(poi);
         const poiZLevel = poi.properties.zLevel;
@@ -226,7 +227,10 @@ const MazeMap = (props: MazeMapProps) => {
 
     if (window.Mazemap) {
       const poi = getPoiAt(coordinates, zLevel);
-      if (!poi) return null;
+      if (!poi) {
+        drawMarker(map, coordinates, zLevel);
+        return;
+      }
       if (poi.geometry === 'Polygon' && marker.type === MarkerType.POIMarker) {
         highlightPoi(poi);
         map.flyTo({
@@ -235,7 +239,6 @@ const MazeMap = (props: MazeMapProps) => {
           speed: 0.5,
         });
       }
-
       drawMarker(map, getCoordinates(poi.coordinates), poi.zLevel);
     }
   };
@@ -296,7 +299,6 @@ const MazeMap = (props: MazeMapProps) => {
             showPoiOnLoad(props.highlighter.poiOnLoad);
           }
         }
-
         if (props.marker) {
           map.on('click', (e: MapClick) => {
             addMarker(map, e, props.marker as MarkerProp);
