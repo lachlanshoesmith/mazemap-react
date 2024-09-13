@@ -57,6 +57,8 @@
   hideicons
   // add this to hide all building names / icons (i.e any descriptive material on the map)
   hideIconsNames
+  // sets the title of the campus
+  setTitle={"epic"}
 />
 ```
 
