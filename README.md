@@ -53,6 +53,10 @@
       zLevel: 0
     }
   }}
+  // add this to hide all icons
+  hideicons
+  // add this to hide all building names / icons (i.e any descriptive material on the map)
+  hideIconsNames
 />
 ```
 
