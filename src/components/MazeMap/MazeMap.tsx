@@ -69,6 +69,7 @@ export interface MazeMapProps extends MazeMapUserOptions {
   onMapClick?: (coordinates: Coordinates, zLevel: number) => void;
   line?: LineProp;
   highlighter?: HighlighterProp;
+  zoomTo?: ZoomToProp;
 }
 
 export interface MazeMapOptions extends MazeMapUserOptions {
@@ -106,9 +107,16 @@ const getCoordinates = (
   return coordinates;
 };
 
+export interface ZoomToProp {
+  center: Coordinates | CoordinatesObject,
+  zoom: number,
+  speed?: number
+}
+
 const MazeMap = (props: MazeMapProps) => {
   let highlighter: any;
   let marker: any;
+  let map: any;
 
   const userOptions: MazeMapUserOptions = {
     campuses: props.campuses,
@@ -129,6 +137,25 @@ const MazeMap = (props: MazeMapProps) => {
       marker.remove();
     }
   };
+
+  useEffect(() => {
+    if (!props.zoomTo) return;
+    const center = getCoordinates(props.zoomTo.center);
+    const zoomAmount = props.zoomTo.zoom;
+    if (!props.speed) {
+      map.jumpTo({
+        center,
+        zoomAmount,
+      })
+    } else {
+      const speed = props.zoomTo.speed;
+      map.flyTo({
+        center,
+        zoomAmount,
+        speed
+      })
+    }
+  }, [props.zoomTo])
 
   const clearHighlighter = () => {
     if (highlighter) {
@@ -197,28 +224,26 @@ const MazeMap = (props: MazeMapProps) => {
     highlighter.highlight(poi);
   };
 
-  const getPoiAt = (
+  const getPoiAt = async (
     coordinates: CoordinatesObject,
     zLevel: number
-  ): Poi | null => {
-    if (window.Mazemap) {
-      window.Mazemap.Data.getPoiAt(coordinates, zLevel).then((poi: any) => {
-        if (!poi) return null;
-        const poiCoordinates: CoordinatesObject =
-          window.Mazemap.Util.getPoiLngLat(poi);
-        const poiZLevel = poi.properties.zLevel;
-        const geometry = poi.geometry.type;
-        return {
-          coordinates: poiCoordinates,
-          zLevel: poiZLevel,
-          geometry,
-        };
-      });
-    }
-    return null;
+  ): Promise<Poi | null> => {
+    if (!window.Mazemap) return null;
+    const poiFound = await window.Mazemap.Data.getPoiAt(coordinates, zLevel);
+    if (!poiFound) return null;
+    const poiCoordinates: CoordinatesObject =
+      await window.Mazemap.Util.getPoiLngLat(poiFound);
+    const poiZLevel = poiFound.properties.zLevel;
+    const geometry = poiFound.geometry.type;
+    const poi: Poi = {
+      coordinates: poiCoordinates,
+      zLevel: poiZLevel,
+      geometry,
+    };
+    return poi;
   };
 
-  const addMarker = (map: any, e: MapClick, marker: MarkerProp) => {
+  const addMarker = async (map: any, e: MapClick, marker: MarkerProp) => {
     let coordinates = e.lngLat;
     let zLevel = map.zLevel;
 
@@ -226,7 +251,7 @@ const MazeMap = (props: MazeMapProps) => {
     clearHighlighter();
 
     if (window.Mazemap) {
-      const poi = getPoiAt(coordinates, zLevel);
+      const poi = await getPoiAt(coordinates, zLevel);
       if (!poi) {
         drawMarker(map, coordinates, zLevel);
         return;
@@ -287,7 +312,7 @@ const MazeMap = (props: MazeMapProps) => {
 
   const prepareMap = () => {
     if (window.Mazemap) {
-      const map = new window.Mazemap.Map(mapOptions);
+      map = new window.Mazemap.Map(mapOptions);
       map.on('load', () => {
         if (props.controls) {
           map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
@@ -300,8 +325,8 @@ const MazeMap = (props: MazeMapProps) => {
           }
         }
         if (props.marker) {
-          map.on('click', (e: MapClick) => {
-            addMarker(map, e, props.marker as MarkerProp);
+          map.on('click', async (e: MapClick) => {
+            await addMarker(map, e, props.marker as MarkerProp);
           });
         }
 
@@ -330,9 +355,9 @@ const MazeMap = (props: MazeMapProps) => {
     script.src = 'https://api.mazemap.com/js/v2.1.2/mazemap.min.js';
     document.body.appendChild(script);
 
-    const map = document.getElementById('map');
-    if (map) {
-      map.classList.add('mazemap');
+    const mapDOM = document.getElementById('map');
+    if (mapDOM) {
+      mapDOM.classList.add('mazemap');
     }
 
     script.onload = () => {

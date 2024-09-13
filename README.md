@@ -2,7 +2,7 @@
 
 [mazemap](https://api.mazemap.com/js/v2.1.2/docs/) but as a react component featuring types
 
-![1.0.19](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
+![1.0.21](https://img.shields.io/npm/v/@lachlanshoesmith/mazemap-react) | [npm](https://www.npmjs.com/package/@lachlanshoesmith/mazemap-react)
 
 ## example usage
 
@@ -38,8 +38,8 @@
       [151.244924424, -33.9126716815]
     ],
     width: 3
-  }},
-  highlight={{
+  }}
+  highlighter={{
     fill: true,
     outline: true,
     colour: '#ff0000',
@@ -52,6 +52,13 @@
       coordinates: [151.244924424, -33.9126716815],
       zLevel: 0
     }
+  }}
+  zoomTo={{
+    // a point on the map will be zoomed in on when
+    // this prop is updated
+    center: [151.244924424, -33.9126716815],
+    zoom: 10,
+    speed: 3 // optional
   }}
 />
 ```
